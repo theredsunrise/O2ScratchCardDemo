@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="app_name">Scratch Card Demo</string>
+    <string name="exception_no_internet-connection">No internet connection.</string>"
+    <string name="exception_invalid_scratch_card_state_transition">Invalid scratch card state transition.</string>
+</resources>
