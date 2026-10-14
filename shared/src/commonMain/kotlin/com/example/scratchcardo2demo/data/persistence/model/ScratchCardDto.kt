@@ -5,8 +5,8 @@ import kotlin.uuid.Uuid
 
 @Serializable
 data class ScratchCardDto(
-    val uuid: Uuid?,
-    val internalState: Int?,
+    val uuid: Uuid,
+    val version: Int?,
     val state: ScratchCardState
 ) {
     @Serializable

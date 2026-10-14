@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.compose.uiTooling)
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.koin.android)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -66,7 +67,7 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
 
             implementation(libs.koin.core)
-            implementation(libs.koin.core.viewmodel)
+            implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose)
 
             implementation(libs.jetbrains.navigation3.ui)

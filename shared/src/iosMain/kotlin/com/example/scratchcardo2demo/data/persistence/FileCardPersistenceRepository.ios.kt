@@ -3,9 +3,13 @@ package com.example.scratchcardo2demo.data.persistence
 import com.example.scratchcardo2demo.data.persistence.mapper.toDomain
 import com.example.scratchcardo2demo.data.persistence.mapper.toDto
 import com.example.scratchcardo2demo.data.persistence.model.ScratchCardDto
-import com.example.scratchcardo2demo.domain.ScratchCard
 import com.example.scratchcardo2demo.domain.`interface`.ScratchCardPersistenceRepository
+import com.example.scratchcardo2demo.domain.model.ScratchCard
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -20,14 +24,22 @@ import platform.Foundation.stringWithContentsOfFile
 import platform.Foundation.writeToURL
 
 @OptIn(ExperimentalForeignApi::class)
-class FileScratchCardPersistenceRepository(private val json: Json) :
+class FileScratchCardPersistenceRepository(
+    private val json: Json,
+    preferencesName: String,
+    scope: CoroutineScope,
+) :
     ScratchCardPersistenceRepository {
 
     private val key = "scratch_card_data"
     private val preferencesUrl: NSURL
     private val mutex = Mutex()
 
+    private val _state = MutableSharedFlow<ScratchCard?>(replay = 1)
+    override val state: Flow<ScratchCard?> = _state
+
     init {
+        check(preferencesName.isNotBlank()) { "App preferences name cannot be empty or blank." }
         val fileManager = NSFileManager.defaultManager
 
         val appSupport = requireNotNull(
@@ -68,23 +80,39 @@ class FileScratchCardPersistenceRepository(private val json: Json) :
 
         preferencesUrl = requireNotNull(
             directory.URLByAppendingPathComponent(
-                "app_preferences",
+                preferencesName,
                 isDirectory = false,
             )
         ) {
             "Failed to create App preferences."
         }
+
+        scope.launch {
+            _state.emit(get())
+        }
     }
 
     override suspend fun get(): ScratchCard? = mutex.withLock {
         val cardData = readAll()[key] ?: return@withLock null
-        json.decodeFromString<ScratchCardDto>(cardData).toDomain()
+        val card = json.decodeFromString<ScratchCardDto>(cardData).toDomain()
+        return card
+    }
+
+    override suspend fun getOrCreate(card: ScratchCard): ScratchCard = mutex.withLock {
+        get() ?: write(card = card)
     }
 
     override suspend fun update(card: ScratchCard) = mutex.withLock {
+        write(card = card)
+        Unit
+    }
+
+    private suspend fun write(card: ScratchCard): ScratchCard {
         val content = readAll()
         content[key] = json.encodeToString(card.toDto())
         writeAll(content)
+        _state.emit(card)
+        return card
     }
 
     private fun readAll(): MutableMap<String, String> {

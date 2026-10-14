@@ -9,7 +9,9 @@ class Navigator(val navigationState: NavigationState) {
             if (destination in topLevelDestinations) {
                 currentToLevelDestination = destination
             } else {
-                currentBackStack.add(destination)
+                if(currentBackStack.lastOrNull() != destination) {
+                    currentBackStack.add(destination)
+                }
             }
         }
 

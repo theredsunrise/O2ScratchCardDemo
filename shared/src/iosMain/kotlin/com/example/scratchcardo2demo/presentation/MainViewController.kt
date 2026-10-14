@@ -1,4 +1,4 @@
-package com.example.scratchcardo2demo
+package com.example.scratchcardo2demo.presentation
 
 import androidx.compose.ui.window.ComposeUIViewController
 

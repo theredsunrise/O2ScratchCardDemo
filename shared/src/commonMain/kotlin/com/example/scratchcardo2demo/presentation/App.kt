@@ -1,4 +1,4 @@
-package com.example.scratchcardo2demo
+package com.example.scratchcardo2demo.presentation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,9 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.ui.NavDisplay
-import com.example.scratchcardo2demo.presentation.defaultPopTransitionSpec
-import com.example.scratchcardo2demo.presentation.defaultPredictivePopTransitionSpec
-import com.example.scratchcardo2demo.presentation.defaultTransitionSpec
 import com.example.scratchcardo2demo.presentation.navigation.AppDestination
 import com.example.scratchcardo2demo.presentation.navigation.appEntryProvider
 import com.example.scratchcardo2demo.presentation.navigation.rememberNavigator
@@ -21,8 +18,8 @@ fun App() {
     MaterialTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
             val navigator = rememberNavigator(
-                startDestination = AppDestination.ScratchCard,
-                topLevelDestinations = setOf(AppDestination.ScratchCard)
+                startDestination = AppDestination.AppScreen,
+                topLevelDestinations = setOf(AppDestination.AppScreen)
             )
             NavDisplay(
                 modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues),

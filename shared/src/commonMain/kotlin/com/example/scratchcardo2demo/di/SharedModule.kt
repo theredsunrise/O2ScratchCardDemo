@@ -1,27 +1,68 @@
 package com.example.scratchcardo2demo.di
 
-import androidx.lifecycle.SavedStateHandle
+import com.example.scratchcardo2demo.config.Config
+import com.example.scratchcardo2demo.data.networking.HttpClientFactory
+import com.example.scratchcardo2demo.data.networking.KtorCardNetworkRepository
+import com.example.scratchcardo2demo.domain.`interface`.ScratchCardNetworkRepository
+import com.example.scratchcardo2demo.domain.usecase.ActivateCardUseCase
+import com.example.scratchcardo2demo.domain.usecase.DefaultActivateCardUseCase
+import com.example.scratchcardo2demo.domain.usecase.DefaultLoadCardUseCase
+import com.example.scratchcardo2demo.domain.usecase.DefaultScratchCardUseCase
+import com.example.scratchcardo2demo.domain.usecase.GetOrCreateCardUseCase
+import com.example.scratchcardo2demo.domain.usecase.ScratchCardUseCase
+import com.example.scratchcardo2demo.presentation.viewmodel.ActivateCardScreenViewModel
+import com.example.scratchcardo2demo.presentation.viewmodel.AppViewModel
 import com.example.scratchcardo2demo.presentation.viewmodel.ScratchCardScreenViewModel
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 expect val platformSharedModule: Module
 
 val sharedModule = module {
     includes(platformSharedModule)
-    single {
-        Json {
-            ignoreUnknownKeys = true
-        }
+    viewModel {
+        AppViewModel(
+            dispatcher = Dispatchers.IO,
+            persistenceRepository = get()
+        )
     }
     viewModel {
         ScratchCardScreenViewModel(
             dispatcher = Dispatchers.IO,
-            savedState = get<SavedStateHandle>()
+            scratchCardUseCase = get(),
+            persistenceRepository = get()
         )
     }
+    viewModel {
+        ActivateCardScreenViewModel(
+            dispatcher = Dispatchers.IO,
+            activateCardUseCase = get(),
+            persistenceRepository = get()
+        )
+    }
+    single<Json> {
+        Json {
+            ignoreUnknownKeys = true
+        }
+    }
+    single<HttpClient> { HttpClientFactory.createDefault() }
+    single<ScratchCardNetworkRepository> {
+        KtorCardNetworkRepository(
+            endpoints = KtorCardNetworkRepository.Endpoints(
+                baseUrl = Config.Networking.BASE_URL,
+                versionEndpoint = Config.Networking.VERSION_ENDPOINT
+            ),
+            httpClient = get()
+        )
+    }
+    factoryOf(::DefaultLoadCardUseCase) bind GetOrCreateCardUseCase::class
+    factoryOf(::DefaultScratchCardUseCase) bind ScratchCardUseCase::class
+    factoryOf(::DefaultActivateCardUseCase) bind ActivateCardUseCase::class
 }

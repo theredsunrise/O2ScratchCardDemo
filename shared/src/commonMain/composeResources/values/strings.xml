@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
     <string name="app_name">Scratch Card Demo</string>
-    <string name="exception_no_internet-connection">No internet connection.</string>"
-    <string name="exception_invalid_scratch_card_state_transition">Invalid scratch card state transition.</string>
+    <string name="exception_no_internet-connection">No internet connection.</string>
+    <string name="scratch_card_scratch_action">Scratch</string>
+    <string name="scratch_card_activate_action">Activate</string>
+    <string name="scratch_card_retry_action">Retry</string>
+    <string name="scratch_card_identifier">ID CARD: </string>
+    <string name="scratch_card_status">STATUS: </string>
+    <string name="scratch_card_unscratched">UNSCRATCHED</string>
+    <string name="scratch_card_scratched">SCRATCHED</string>
+    <string name="scratch_card_activated">ACTIVATED</string>
 </resources>
