@@ -12,11 +12,17 @@ class KtorCardNetworkRepository(
     private val endpoints: Endpoints,
     private val httpClient: HttpClient
 ) : ScratchCardNetworkRepository {
-    data class Endpoints(val baseUrl: String, val versionEndpoint: String)
+
+    companion object {
+        const val CODE_QUERY_PARAM = "code"
+    }
+
+    data class Endpoints(val baseUrl: String,
+                         val versionEndpoint: String)
 
     override suspend fun fetchVersion(cardUuid: Uuid): Version =
         httpClient.get<VersionDto>(
             baseUrl = endpoints.baseUrl, endpoint = endpoints.versionEndpoint,
-            params = mapOf("code" to cardUuid.toString())
+            params = mapOf(CODE_QUERY_PARAM to cardUuid.toString())
         ).toDomain()
 }

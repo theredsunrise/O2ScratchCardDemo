@@ -18,7 +18,7 @@ class Navigator(val navigationState: NavigationState) {
     fun goBack() =
         navigationState.currentBackStack.apply {
             if (size > 1) {
-                removeLast()
+                removeAt(lastIndex)
             }
         }
 }

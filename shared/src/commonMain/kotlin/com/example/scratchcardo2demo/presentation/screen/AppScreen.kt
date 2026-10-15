@@ -14,7 +14,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIState
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
 import com.example.scratchcardo2demo.presentation.navigation.AppDestination
 import com.example.scratchcardo2demo.presentation.screen.component.ScratchCard
 import org.jetbrains.compose.resources.stringResource
@@ -25,7 +25,7 @@ import scratchcardo2demo.shared.generated.resources.scratch_card_scratch_action
 @Composable
 fun AppScreen(
     modifier: Modifier,
-    uiState: State<ScratchCardUIState>,
+    uiState: State<ScratchCardUiState>,
     onNavigate: (AppDestination) -> Unit
 ) {
     Column(

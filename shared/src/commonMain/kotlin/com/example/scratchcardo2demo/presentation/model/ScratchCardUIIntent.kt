@@ -1,5 +1,5 @@
 package com.example.scratchcardo2demo.presentation.model
 
-sealed interface ScratchCardUIIntent {
-    data object Scratch : ScratchCardUIIntent
+sealed interface ScratchCardUiIntent {
+    data object Scratch : ScratchCardUiIntent
 }

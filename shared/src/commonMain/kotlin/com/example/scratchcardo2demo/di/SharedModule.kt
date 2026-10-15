@@ -10,6 +10,7 @@ import com.example.scratchcardo2demo.domain.usecase.ActivateCardUseCase
 import com.example.scratchcardo2demo.domain.usecase.DefaultActivateCardUseCase
 import com.example.scratchcardo2demo.domain.usecase.DefaultScratchCardUseCase
 import com.example.scratchcardo2demo.domain.usecase.ScratchCardUseCase
+import com.example.scratchcardo2demo.presentation.AppState
 import com.example.scratchcardo2demo.presentation.viewmodel.ActivateCardScreenViewModel
 import com.example.scratchcardo2demo.presentation.viewmodel.AppViewModel
 import com.example.scratchcardo2demo.presentation.viewmodel.ScratchCardScreenViewModel
@@ -32,7 +33,7 @@ val sharedModule = module {
     viewModel {
         AppViewModel(
             dispatcher = Dispatchers.IO,
-            persistenceRepository = get()
+            persistenceRepository = get(),
         )
     }
     viewModel {
@@ -64,8 +65,20 @@ val sharedModule = module {
             httpClient = get()
         )
     }
+    single<CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    single<AppState> {
+        AppState(
+            activatorManager = get(),
+            scope = get()
+        )
+    }
+    single<ScratchCardActivatorManager> {
+        DefaultScratchCardActivatorManager(
+            activateCardUseCase = get(),
+            scope = get()
+        )
+    }
+
     factoryOf(::DefaultScratchCardUseCase) bind ScratchCardUseCase::class
     factoryOf(::DefaultActivateCardUseCase) bind ActivateCardUseCase::class
-    single<CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
-    single<ScratchCardActivatorManager> { DefaultScratchCardActivatorManager(get(), get()) }
 }

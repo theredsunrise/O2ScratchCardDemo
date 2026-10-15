@@ -7,6 +7,7 @@ import com.example.scratchcardo2demo.domain.`interface`.ScratchCardPersistenceRe
 import com.example.scratchcardo2demo.domain.model.ScratchCard
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -35,7 +36,11 @@ class FileScratchCardPersistenceRepository(
     private val preferencesUrl: NSURL
     private val mutex = Mutex()
 
-    private val _state = MutableSharedFlow<ScratchCard?>(replay = 1)
+    private val _state = MutableSharedFlow<ScratchCard?>(
+        replay = 1,
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     override val state: Flow<ScratchCard?> = _state
 
     init {
@@ -96,10 +101,6 @@ class FileScratchCardPersistenceRepository(
         val cardData = readAll()[key] ?: return@withLock null
         val card = json.decodeFromString<ScratchCardDto>(cardData).toDomain()
         return card
-    }
-
-    override suspend fun getOrCreate(card: ScratchCard): ScratchCard = mutex.withLock {
-        get() ?: write(card = card)
     }
 
     override suspend fun update(card: ScratchCard) = mutex.withLock {

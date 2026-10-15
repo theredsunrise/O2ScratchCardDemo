@@ -13,6 +13,7 @@ import com.example.scratchcardo2demo.data.persistence.model.ScratchCardDto
 import com.example.scratchcardo2demo.domain.`interface`.ScratchCardPersistenceRepository
 import com.example.scratchcardo2demo.domain.model.ScratchCard
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -30,29 +31,25 @@ class DataStoreScratchCardPersistenceRepository(
     private val key = stringPreferencesKey("scratch_card_data")
     private val dataStore: DataStore<Preferences>
 
-    private val _state = MutableSharedFlow<ScratchCard?>(replay = 1)
+    private val _state = MutableSharedFlow<ScratchCard?>(
+        replay = 1,
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     override val state: Flow<ScratchCard?> = _state
 
     init {
         dataStore = PreferenceDataStoreFactory.create {
             check(preferencesName.isNotBlank()) { "App preferences name cannot be empty or blank." }
-            File(ContextCompat.getNoBackupFilesDir(appContext),
-                "datastore/${preferencesName}.preferences_pb")
+            File(
+                ContextCompat.getNoBackupFilesDir(appContext),
+                "datastore/${preferencesName}.preferences_pb"
+            )
         }
         scope.launch {
             _state.emit(get())
         }
     }
-
-    override suspend fun getOrCreate(card: ScratchCard): ScratchCard =
-        get() ?: run {
-            dataStore.edit {
-                val dto = card.toDto()
-                it[key] = json.encodeToString(dto)
-                _state.emit(card)
-            }
-            card
-        }
 
     override suspend fun get(): ScratchCard? {
         val preferences = dataStore.data.first()

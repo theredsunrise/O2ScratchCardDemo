@@ -4,7 +4,8 @@ import android.app.Application
 import com.example.scratchcardo2demo.di.androidInitKoin
 
 class MainApplication : Application() {
-    init {
+    override fun onCreate() {
+        super.onCreate()
         androidInitKoin(applicationContext = this)
     }
 }

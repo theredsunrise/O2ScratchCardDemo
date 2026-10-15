@@ -3,9 +3,9 @@ package com.example.scratchcardo2demo.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scratchcardo2demo.domain.`interface`.ScratchCardPersistenceRepository
-import com.example.scratchcardo2demo.presentation.mapper.toUI
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIPhase
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIState
+import com.example.scratchcardo2demo.presentation.mapper.toUi
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiResult
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
 import com.example.scratchcardo2demo.shared.assertIsNotMainThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,12 +19,12 @@ class AppViewModel(
     persistenceRepository: ScratchCardPersistenceRepository,
 ) : ViewModel() {
 
-    val uiState: StateFlow<ScratchCardUIState> = persistenceRepository.state.map {
+    val uiState: StateFlow<ScratchCardUiState> = persistenceRepository.state.map {
         assertIsNotMainThread()
-        it?.toUI() ?: ScratchCardUIState.Success(ScratchCardUIPhase.Unscratched)
+        it?.toUi(result = ScratchCardUiResult.Nothing) ?: ScratchCardUiState.UNSCRATCHED
     }.flowOn(dispatcher).stateIn(
         viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        ScratchCardUIState.Loading
+        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
+        initialValue = ScratchCardUiState.UNSCRATCHED
     )
 }

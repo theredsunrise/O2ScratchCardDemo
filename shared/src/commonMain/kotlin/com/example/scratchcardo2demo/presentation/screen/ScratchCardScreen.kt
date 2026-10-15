@@ -10,18 +10,16 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIIntent
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIPhaseId
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIState
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiIntent
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhaseId
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
 import com.example.scratchcardo2demo.presentation.screen.component.ScratchCard
-import scratchcardo2demo.shared.generated.resources.Res
-import scratchcardo2demo.shared.generated.resources.scratch_card_scratch_action
 
 @Composable
 fun ScratchCardScreen(
     modifier: Modifier,
-    uiState: State<ScratchCardUIState>,
-    onIntent: (ScratchCardUIIntent) -> Unit
+    uiState: State<ScratchCardUiState>,
+    onIntent: (ScratchCardUiIntent) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -32,12 +30,12 @@ fun ScratchCardScreen(
         ScratchCard(
             modifier = Modifier.fillMaxSize(),
             uiState = uiState,
-            phaseId = ScratchCardUIPhaseId.SCRATCHED,
+            actionForPhase = ScratchCardUiPhaseId.SCRATCHED,
             onClick = {
-                onIntent(ScratchCardUIIntent.Scratch)
+                onIntent(ScratchCardUiIntent.Scratch)
             },
             onError = {
-                onIntent(ScratchCardUIIntent.Scratch)
+                onIntent(ScratchCardUiIntent.Scratch)
             }
         )
     }

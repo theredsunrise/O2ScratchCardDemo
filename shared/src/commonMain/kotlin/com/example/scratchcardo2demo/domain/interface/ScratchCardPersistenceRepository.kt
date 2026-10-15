@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface ScratchCardPersistenceRepository {
     val state: Flow<ScratchCard?>
 
-    suspend fun getOrCreate(card: ScratchCard): ScratchCard
     suspend fun update(card: ScratchCard)
     suspend fun get(): ScratchCard?
 }

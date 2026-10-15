@@ -20,14 +20,17 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.scratchcardo2demo.domain.model.ScratchCard
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIPhase
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIPhaseId
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIState
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhase
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhaseId
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiResult
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
+import com.example.scratchcardo2demo.presentation.mapper.PresentationError
 import org.jetbrains.compose.resources.stringResource
 import scratchcardo2demo.shared.generated.resources.Res
+import scratchcardo2demo.shared.generated.resources.error_title
 import scratchcardo2demo.shared.generated.resources.scratch_card_identifier
 import scratchcardo2demo.shared.generated.resources.scratch_card_retry_action
 import scratchcardo2demo.shared.generated.resources.scratch_card_status
@@ -36,10 +39,10 @@ import kotlin.uuid.Uuid
 @Composable
 fun ScratchCard(
     modifier: Modifier = Modifier,
-    uiState: State<ScratchCardUIState>,
-    phaseId: ScratchCardUIPhaseId? = null,
-    onClick: (() -> Unit)? = null,
-    onError: (() -> Unit)? = null
+    uiState: State<ScratchCardUiState>,
+    actionForPhase: ScratchCardUiPhaseId? = null,
+    onClick: () -> Unit,
+    onError: () -> Unit
 ) {
     val stateValue = uiState.value
     Card(
@@ -59,46 +62,69 @@ fun ScratchCard(
         ) {
             Spacer(Modifier.height(16.dp))
 
-            Text(
-                text = getUuid(state = stateValue.asSuccess),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Spacer(Modifier.height(16.dp))
+            val uiResult = stateValue.uiResult
+            when (uiResult) {
+                is ScratchCardUiResult.Nothing, is ScratchCardUiResult.Loading -> {
+                    Text(
+                        text = getUuid(state = stateValue),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(Modifier.height(16.dp))
 
-            Text(
-                text = getStatus(state = stateValue.asSuccess),
-                style = MaterialTheme.typography.titleMedium,
-            )
+                    Text(
+                        text = getStatus(state = stateValue),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+
+                is ScratchCardUiResult.Error -> {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = stringResource(Res.string.error_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = uiResult.error.asText(),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+
             Spacer(Modifier.weight(1f))
 
-            phaseId?.also { phase ->
+            actionForPhase?.also { phase ->
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (stateValue.isLoading) {
+                    if (uiResult.isLoading) {
                         CircularProgressIndicator()
                     } else if (
-                        stateValue.isError ||
+                        uiResult.isError ||
                         stateValue.isCurrentPhaseBelow(
                             phaseId = phase
                         )
                     ) {
                         Button(
                             onClick = {
-                                if (stateValue.isSuccess) {
-                                    onClick?.invoke()
+                                if (uiResult.isError) {
+                                    onError()
                                 } else {
-                                    onError?.invoke()
+                                    onClick()
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(
-                                if (stateValue.isSuccess) {
-                                    phase.name()
-                                } else {
+                                if (uiResult.isError) {
                                     stringResource(Res.string.scratch_card_retry_action)
+                                } else {
+                                    phase.actionName()
                                 }
                             )
                         }
@@ -110,15 +136,21 @@ fun ScratchCard(
 }
 
 @Composable
-private fun getUuid(state: ScratchCardUIState.Success?): String {
+private fun PresentationError.asText(): String = when (this) {
+    is PresentationError.Resource -> stringResource(value)
+    is PresentationError.Text -> value
+}
+
+@Composable
+private fun getUuid(state: ScratchCardUiState?): String {
     return state?.uuid?.let { uuid ->
         stringResource(Res.string.scratch_card_identifier) + uuid
     }.orEmpty()
 }
 
 @Composable
-private fun getStatus(state: ScratchCardUIState.Success?): String {
-    return state?.phase?.id?.name()?.let { status ->
+private fun getStatus(state: ScratchCardUiState?): String {
+    return state?.currentPhase?.id?.statusName()?.let { status ->
         stringResource(Res.string.scratch_card_status) + status
     }.orEmpty()
 }
@@ -129,11 +161,12 @@ private fun ScratchCardWithButtonPreview() {
     ScratchCard(
         modifier = Modifier.fillMaxSize(),
         uiState = mutableStateOf(
-            ScratchCardUIState.Success(
-                phase = ScratchCardUIPhase.Scratched(cardUuid = Uuid.random())
+            ScratchCardUiState(
+                uiResult = ScratchCardUiResult.Nothing,
+                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
             )
         ),
-        phaseId = ScratchCardUIPhaseId.ACTIVATED,
+        actionForPhase = ScratchCardUiPhaseId.ACTIVATED,
         onClick = {},
         onError = {}
     )
@@ -145,10 +178,14 @@ private fun ScratchCardWithoutButtonPreview() {
     ScratchCard(
         modifier = Modifier.fillMaxSize(),
         uiState = mutableStateOf(
-            ScratchCardUIState.Success(
-                phase = ScratchCardUIPhase.Scratched(cardUuid = Uuid.random())
+            ScratchCardUiState(
+                uiResult = ScratchCardUiResult.Nothing,
+                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
             )
-        )
+        ),
+        actionForPhase = ScratchCardUiPhaseId.UNSCRATCHED,
+        onClick = {},
+        onError = {}
     )
 }
 
@@ -158,10 +195,30 @@ private fun ScratchCardErrorStatePreview() {
     ScratchCard(
         modifier = Modifier.fillMaxSize(),
         uiState = mutableStateOf(
-            ScratchCardUIState.Error(Exception("Error"))
+            ScratchCardUiState(
+                uiResult = ScratchCardUiResult.Error(PresentationError.Text("Error message")),
+                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
+            )
         ),
-        phaseId = ScratchCardUIPhaseId.ACTIVATED,
+        actionForPhase = ScratchCardUiPhaseId.ACTIVATED,
+        onClick = {},
         onError = {}
+    )
+}
 
+@Composable
+@Preview
+private fun ScratchCardLoadingStatePreview() {
+    ScratchCard(
+        modifier = Modifier.fillMaxSize(),
+        uiState = mutableStateOf(
+            ScratchCardUiState(
+                uiResult = ScratchCardUiResult.Loading,
+                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
+            )
+        ),
+        actionForPhase = ScratchCardUiPhaseId.ACTIVATED,
+        onClick = {},
+        onError = {}
     )
 }

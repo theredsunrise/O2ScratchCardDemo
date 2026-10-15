@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
     <string name="app_name">Scratch Card Demo</string>
-    <string name="exception_no_internet-connection">No internet connection.</string>
+    <string name="ok_button">OK</string>
+    <string name="error_title">Error</string>
+    <string name="error_card_not_found">Scratch card was not found.</string>
+    <string name="error_insufficient_version">The scratch card cannot be activated.</string>
+    <string name="error_invalid_state_transition">Invalid scratch card state transition.</string>
+    <string name="error_unknown">An unknown error occurred.</string>
+    <string name="scratch_card_unscratch_action">Unscratch</string>
     <string name="scratch_card_scratch_action">Scratch</string>
     <string name="scratch_card_activate_action">Activate</string>
     <string name="scratch_card_retry_action">Retry</string>

@@ -10,16 +10,16 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.scratchcardo2demo.presentation.model.ActivateCardUIIntent
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIPhaseId
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUIState
+import com.example.scratchcardo2demo.presentation.model.ActivateCardUiIntent
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhaseId
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
 import com.example.scratchcardo2demo.presentation.screen.component.ScratchCard
 
 @Composable
 fun ActivateCardScreen(
     modifier: Modifier,
-    uiState: State<ScratchCardUIState>,
-    onIntent: (ActivateCardUIIntent) -> Unit
+    uiState: State<ScratchCardUiState>,
+    onIntent: (ActivateCardUiIntent) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -30,12 +30,12 @@ fun ActivateCardScreen(
         ScratchCard(
             modifier = Modifier.fillMaxSize(),
             uiState = uiState,
-            phaseId = ScratchCardUIPhaseId.ACTIVATED,
+            actionForPhase = ScratchCardUiPhaseId.ACTIVATED,
             onClick = {
-                onIntent(ActivateCardUIIntent.Activate)
+                onIntent(ActivateCardUiIntent.Activate)
             },
             onError = {
-                onIntent(ActivateCardUIIntent.Activate)
+                onIntent(ActivateCardUiIntent.Activate)
             }
         )
     }
