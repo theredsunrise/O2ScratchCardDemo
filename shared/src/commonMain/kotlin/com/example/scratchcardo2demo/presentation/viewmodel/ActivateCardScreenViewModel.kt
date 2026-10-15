@@ -3,7 +3,7 @@ package com.example.scratchcardo2demo.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scratchcardo2demo.domain.`interface`.ScratchCardPersistenceRepository
-import com.example.scratchcardo2demo.domain.usecase.ActivateCardUseCase
+import com.example.scratchcardo2demo.domain.`interface`.ScratchCardActivatorManager
 import com.example.scratchcardo2demo.presentation.mapper.toUI
 import com.example.scratchcardo2demo.presentation.model.ActivateCardUIIntent
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUIPhase
@@ -12,6 +12,7 @@ import com.example.scratchcardo2demo.shared.assertIsNotMainThread
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,18 +30,20 @@ import kotlinx.coroutines.launch
 
 class ActivateCardScreenViewModel(
     dispatcher: CoroutineDispatcher,
-    activateCardUseCase: ActivateCardUseCase,
+    activatorManager: ScratchCardActivatorManager,
     persistenceRepository: ScratchCardPersistenceRepository,
 ) : ViewModel() {
 
     private val trigger = MutableSharedFlow<ActivateCardUIIntent>()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val activateCardFlow: Flow<ScratchCardUIState> =
         trigger.filterIsInstance<ActivateCardUIIntent.Activate>().flatMapLatest {
 
             flow {
                 assertIsNotMainThread()
-                emit(activateCardUseCase.invoke().toUI())
+                activatorManager.activate()
+                emit(activatorManager.state.receive().getOrThrow().toUI())
             }.onStart {
                 emit(ScratchCardUIState.Loading)
             }.catch {

@@ -3,19 +3,21 @@ package com.example.scratchcardo2demo.di
 import com.example.scratchcardo2demo.config.Config
 import com.example.scratchcardo2demo.data.networking.HttpClientFactory
 import com.example.scratchcardo2demo.data.networking.KtorCardNetworkRepository
+import com.example.scratchcardo2demo.domain.`interface`.ScratchCardActivatorManager
 import com.example.scratchcardo2demo.domain.`interface`.ScratchCardNetworkRepository
+import com.example.scratchcardo2demo.domain.manager.DefaultScratchCardActivatorManager
 import com.example.scratchcardo2demo.domain.usecase.ActivateCardUseCase
 import com.example.scratchcardo2demo.domain.usecase.DefaultActivateCardUseCase
-import com.example.scratchcardo2demo.domain.usecase.DefaultLoadCardUseCase
 import com.example.scratchcardo2demo.domain.usecase.DefaultScratchCardUseCase
-import com.example.scratchcardo2demo.domain.usecase.GetOrCreateCardUseCase
 import com.example.scratchcardo2demo.domain.usecase.ScratchCardUseCase
 import com.example.scratchcardo2demo.presentation.viewmodel.ActivateCardScreenViewModel
 import com.example.scratchcardo2demo.presentation.viewmodel.AppViewModel
 import com.example.scratchcardo2demo.presentation.viewmodel.ScratchCardScreenViewModel
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
@@ -43,7 +45,7 @@ val sharedModule = module {
     viewModel {
         ActivateCardScreenViewModel(
             dispatcher = Dispatchers.IO,
-            activateCardUseCase = get(),
+            activatorManager = get(),
             persistenceRepository = get()
         )
     }
@@ -62,7 +64,8 @@ val sharedModule = module {
             httpClient = get()
         )
     }
-    factoryOf(::DefaultLoadCardUseCase) bind GetOrCreateCardUseCase::class
     factoryOf(::DefaultScratchCardUseCase) bind ScratchCardUseCase::class
     factoryOf(::DefaultActivateCardUseCase) bind ActivateCardUseCase::class
+    single<CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    single<ScratchCardActivatorManager> { DefaultScratchCardActivatorManager(get(), get()) }
 }

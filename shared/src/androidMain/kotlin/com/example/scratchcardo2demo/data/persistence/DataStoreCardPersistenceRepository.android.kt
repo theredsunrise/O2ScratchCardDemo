@@ -22,7 +22,7 @@ import java.io.File
 
 class DataStoreScratchCardPersistenceRepository(
     private val json: Json,
-    private val context: Context,
+    private val appContext: Context,
     private val preferencesName: String,
     scope: CoroutineScope
 ) : ScratchCardPersistenceRepository {
@@ -36,7 +36,7 @@ class DataStoreScratchCardPersistenceRepository(
     init {
         dataStore = PreferenceDataStoreFactory.create {
             check(preferencesName.isNotBlank()) { "App preferences name cannot be empty or blank." }
-            File(ContextCompat.getNoBackupFilesDir(context),
+            File(ContextCompat.getNoBackupFilesDir(appContext),
                 "datastore/${preferencesName}.preferences_pb")
         }
         scope.launch {
