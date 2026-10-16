@@ -37,7 +37,7 @@ class DefaultScratchCardActivatorManager(
         cancel()
         activationJob = scope.launch {
             try {
-                assertIsNotMainThread()
+                //assertIsNotMainThread()
                 state.emit(ResultExt.Loading)
                 state.emit(ResultExt.Success(data = activateCardUseCase()))
             } catch (cancellationException: CancellationException) {

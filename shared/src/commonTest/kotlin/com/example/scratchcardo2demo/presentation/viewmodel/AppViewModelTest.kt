@@ -51,7 +51,7 @@ class AppViewModelTest {
             awaitItem() shouldBe ScratchCardUiState.UNSCRATCHED
             repositoryState.value = scratchedCard
 
-            awaitItem().currentPhase shouldBe ScratchCardUiPhase.Scratched(scratchedCard.uuid)
+            awaitItem().phase shouldBe ScratchCardUiPhase.Scratched(scratchedCard.uuid)
             cancelAndIgnoreRemainingEvents()
         }
     }

@@ -7,7 +7,7 @@ import com.example.scratchcardo2demo.domain.usecase.ActivateCardUseCaseException
 import com.example.scratchcardo2demo.presentation.mapper.PresentationError
 import com.example.scratchcardo2demo.presentation.model.ActivateCardUiIntent
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhase
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUiResult
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiLoadingAndError
 import dev.mokkery.MockMode.autoUnit
 import dev.mokkery.answering.calls
 import dev.mokkery.every
@@ -64,17 +64,17 @@ class ActivateCardScreenViewModelTest {
         viewModel.uiState.test {
             awaitItem()
             viewModel.intent(ActivateCardUiIntent.Activate)
-            awaitItem().uiResult shouldBe ScratchCardUiResult.Loading
+            awaitItem().loadingAndError shouldBe ScratchCardUiLoadingAndError.Loading
 
             repositoryState.value = activatedCard
             val activatingState = awaitItem()
-            activatingState.currentPhase shouldBe ScratchCardUiPhase.Activated(activatedCard.uuid, 287028)
-            activatingState.uiResult shouldBe ScratchCardUiResult.Loading
+            activatingState.phase shouldBe ScratchCardUiPhase.Activated(activatedCard.uuid, 287028)
+            activatingState.loadingAndError shouldBe ScratchCardUiLoadingAndError.Loading
             managerState.tryEmit(ResultExt.Success(activatedCard))
 
             val activatedState = awaitItem()
-            activatedState.currentPhase shouldBe ScratchCardUiPhase.Activated(activatedCard.uuid, 287028)
-            activatedState.uiResult shouldBe ScratchCardUiResult.Nothing
+            activatedState.phase shouldBe ScratchCardUiPhase.Activated(activatedCard.uuid, 287028)
+            activatedState.loadingAndError shouldBe ScratchCardUiLoadingAndError.Nothing
             verify { manager.activate() }
             cancelAndIgnoreRemainingEvents()
         }
@@ -95,11 +95,11 @@ class ActivateCardScreenViewModelTest {
         viewModel.uiState.test {
             awaitItem()
             viewModel.intent(ActivateCardUiIntent.Activate)
-            awaitItem().uiResult shouldBe ScratchCardUiResult.Loading
+            awaitItem().loadingAndError shouldBe ScratchCardUiLoadingAndError.Loading
             managerState.tryEmit(ResultExt.Error(IllegalStateException("activation failed")))
 
             val state = awaitItem()
-            (state.uiResult as ScratchCardUiResult.Error).error shouldBe
+            (state.loadingAndError as ScratchCardUiLoadingAndError.Error).error shouldBe
                 PresentationError.Text("activation failed")
             cancelAndIgnoreRemainingEvents()
         }
@@ -120,7 +120,7 @@ class ActivateCardScreenViewModelTest {
         viewModel.uiState.test {
             awaitItem()
             viewModel.intent(ActivateCardUiIntent.Activate)
-            awaitItem().uiResult shouldBe ScratchCardUiResult.Loading
+            awaitItem().loadingAndError shouldBe ScratchCardUiLoadingAndError.Loading
             managerState.tryEmit(
                 ResultExt.Error(
                     ActivateCardUseCaseException.InsufficientVersionForActivationException(
@@ -130,7 +130,7 @@ class ActivateCardScreenViewModelTest {
             )
 
             val state = awaitItem()
-            (state.uiResult as ScratchCardUiResult.Error).error shouldBe
+            (state.loadingAndError as ScratchCardUiLoadingAndError.Error).error shouldBe
                 PresentationError.Resource(Res.string.error_insufficient_version)
             cancelAndIgnoreRemainingEvents()
         }

@@ -2,14 +2,14 @@ package com.example.scratchcardo2demo.presentation.mapper
 
 import com.example.scratchcardo2demo.domain.model.ScratchCard
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhase
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUiResult
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiLoadingAndError
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
 import com.example.scratchcardo2demo.shared.ResultExt
 
-fun ScratchCard.toUi(result: ScratchCardUiResult): ScratchCardUiState =
+fun ScratchCard.toUi(loadingAndError: ScratchCardUiLoadingAndError): ScratchCardUiState =
     ScratchCardUiState(
-        uiResult = result,
-        currentPhase = when (this.phase) {
+        loadingAndError = loadingAndError,
+        phase = when (this.phase) {
             is ScratchCard.ScratchCardPhase.UnScratched ->
                 ScratchCardUiPhase.Unscratched
 
@@ -21,8 +21,8 @@ fun ScratchCard.toUi(result: ScratchCardUiResult): ScratchCardUiState =
         }
     )
 
-fun ResultExt<ScratchCard>.toUiResult(): ScratchCardUiResult = when (this) {
-    is ResultExt.Error -> ScratchCardUiResult.Error(throwable.toPresentationError())
-    is ResultExt.Loading -> ScratchCardUiResult.Loading
-    is ResultExt.Success -> ScratchCardUiResult.Nothing
+fun ResultExt<ScratchCard>.toLoadingAndError(): ScratchCardUiLoadingAndError = when (this) {
+    is ResultExt.Error -> ScratchCardUiLoadingAndError.Error(throwable.toPresentationError())
+    is ResultExt.Loading -> ScratchCardUiLoadingAndError.Loading
+    is ResultExt.Success -> ScratchCardUiLoadingAndError.Nothing
 }

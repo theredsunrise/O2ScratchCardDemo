@@ -6,8 +6,7 @@ import com.example.scratchcardo2demo.domain.usecase.ScratchCardUseCase
 import com.example.scratchcardo2demo.presentation.mapper.PresentationError
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiIntent
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhase
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUiResult
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiLoadingAndError
 import dev.mokkery.MockMode.autoUnit
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -53,14 +52,14 @@ class ScratchCardScreenViewModelTest {
 
         viewModel.uiState.test {
             val initialState = awaitItem()
-            initialState.currentPhase shouldBe ScratchCardUiPhase.Scratched(scratchedCard.uuid)
-            initialState.uiResult shouldBe ScratchCardUiResult.Nothing
+            initialState.phase shouldBe ScratchCardUiPhase.Scratched(scratchedCard.uuid)
+            initialState.loadingAndError shouldBe ScratchCardUiLoadingAndError.Nothing
             viewModel.intent(ScratchCardUiIntent.Scratch)
-            awaitItem().uiResult shouldBe ScratchCardUiResult.Loading
+            awaitItem().loadingAndError shouldBe ScratchCardUiLoadingAndError.Loading
 
             val result = awaitItem()
-            result.currentPhase shouldBe ScratchCardUiPhase.Scratched(scratchedCard.uuid)
-            result.uiResult shouldBe ScratchCardUiResult.Nothing
+            result.phase shouldBe ScratchCardUiPhase.Scratched(scratchedCard.uuid)
+            result.loadingAndError shouldBe ScratchCardUiLoadingAndError.Nothing
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -76,10 +75,10 @@ class ScratchCardScreenViewModelTest {
         viewModel.uiState.test {
             awaitItem()
             viewModel.intent(ScratchCardUiIntent.Scratch)
-            awaitItem().uiResult shouldBe ScratchCardUiResult.Loading
+            awaitItem().loadingAndError shouldBe ScratchCardUiLoadingAndError.Loading
 
             val state = awaitItem()
-            (state.uiResult as ScratchCardUiResult.Error).error shouldBe
+            (state.loadingAndError as ScratchCardUiLoadingAndError.Error).error shouldBe
                 PresentationError.Text("scratch failed")
             cancelAndIgnoreRemainingEvents()
         }

@@ -35,28 +35,28 @@ enum class ScratchCardUiPhaseId {
 }
 
 data class ScratchCardUiState(
-    val uiResult: ScratchCardUiResult,
-    val currentPhase: ScratchCardUiPhase
+    val loadingAndError: ScratchCardUiLoadingAndError,
+    val phase: ScratchCardUiPhase
 ) {
     val uuid: Uuid?
-        get() = when (currentPhase) {
-            is ScratchCardUiPhase.Activated -> currentPhase.cardUuid
-            is ScratchCardUiPhase.Scratched -> currentPhase.cardUuid
+        get() = when (phase) {
+            is ScratchCardUiPhase.Activated -> phase.cardUuid
+            is ScratchCardUiPhase.Scratched -> phase.cardUuid
             is ScratchCardUiPhase.Unscratched -> null
         }
 
     fun isCurrentPhaseBelow(phaseId: ScratchCardUiPhaseId): Boolean {
         return when {
-            currentPhase.isUnscratched && phaseId.isScratched -> true
-            currentPhase.isScratched && phaseId.isActivated -> true
+            phase.isUnscratched && phaseId.isScratched -> true
+            phase.isScratched && phaseId.isActivated -> true
             else -> false
         }
     }
 
     companion object {
         val UNSCRATCHED = ScratchCardUiState(
-            uiResult = ScratchCardUiResult.Nothing,
-            currentPhase = ScratchCardUiPhase.Unscratched
+            loadingAndError = ScratchCardUiLoadingAndError.Nothing,
+            phase = ScratchCardUiPhase.Unscratched
         )
     }
 }

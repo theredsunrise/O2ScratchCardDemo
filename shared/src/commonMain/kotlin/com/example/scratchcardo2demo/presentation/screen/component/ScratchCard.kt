@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhase
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiPhaseId
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUiResult
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiLoadingAndError
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
 import com.example.scratchcardo2demo.presentation.mapper.PresentationError
 import org.jetbrains.compose.resources.stringResource
@@ -62,9 +62,9 @@ fun ScratchCard(
         ) {
             Spacer(Modifier.height(16.dp))
 
-            val uiResult = stateValue.uiResult
-            when (uiResult) {
-                is ScratchCardUiResult.Nothing, is ScratchCardUiResult.Loading -> {
+            val loadingAndError = stateValue.loadingAndError
+            when (loadingAndError) {
+                is ScratchCardUiLoadingAndError.Nothing, is ScratchCardUiLoadingAndError.Loading -> {
                     Text(
                         text = getUuid(state = stateValue),
                         style = MaterialTheme.typography.bodyMedium,
@@ -77,7 +77,7 @@ fun ScratchCard(
                     )
                 }
 
-                is ScratchCardUiResult.Error -> {
+                is ScratchCardUiLoadingAndError.Error -> {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
@@ -89,7 +89,7 @@ fun ScratchCard(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
-                        text = uiResult.error.asText(),
+                        text = loadingAndError.error.asText(),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -102,17 +102,17 @@ fun ScratchCard(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (uiResult.isLoading) {
+                    if (loadingAndError.isLoading) {
                         CircularProgressIndicator()
                     } else if (
-                        uiResult.isError ||
+                        loadingAndError.isError ||
                         stateValue.isCurrentPhaseBelow(
                             phaseId = phase
                         )
                     ) {
                         Button(
                             onClick = {
-                                if (uiResult.isError) {
+                                if (loadingAndError.isError) {
                                     onError()
                                 } else {
                                     onClick()
@@ -121,7 +121,7 @@ fun ScratchCard(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(
-                                if (uiResult.isError) {
+                                if (loadingAndError.isError) {
                                     stringResource(Res.string.scratch_card_retry_action)
                                 } else {
                                     phase.actionName()
@@ -150,7 +150,7 @@ private fun getUuid(state: ScratchCardUiState?): String {
 
 @Composable
 private fun getStatus(state: ScratchCardUiState?): String {
-    return state?.currentPhase?.id?.statusName()?.let { status ->
+    return state?.phase?.id?.statusName()?.let { status ->
         stringResource(Res.string.scratch_card_status) + status
     }.orEmpty()
 }
@@ -162,8 +162,8 @@ private fun ScratchCardWithButtonPreview() {
         modifier = Modifier.fillMaxSize(),
         uiState = mutableStateOf(
             ScratchCardUiState(
-                uiResult = ScratchCardUiResult.Nothing,
-                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
+                loadingAndError = ScratchCardUiLoadingAndError.Nothing,
+                phase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
             )
         ),
         actionForPhase = ScratchCardUiPhaseId.ACTIVATED,
@@ -179,8 +179,8 @@ private fun ScratchCardWithoutButtonPreview() {
         modifier = Modifier.fillMaxSize(),
         uiState = mutableStateOf(
             ScratchCardUiState(
-                uiResult = ScratchCardUiResult.Nothing,
-                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
+                loadingAndError = ScratchCardUiLoadingAndError.Nothing,
+                phase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
             )
         ),
         actionForPhase = ScratchCardUiPhaseId.UNSCRATCHED,
@@ -196,8 +196,8 @@ private fun ScratchCardErrorStatePreview() {
         modifier = Modifier.fillMaxSize(),
         uiState = mutableStateOf(
             ScratchCardUiState(
-                uiResult = ScratchCardUiResult.Error(PresentationError.Text("Error message")),
-                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
+                loadingAndError = ScratchCardUiLoadingAndError.Error(PresentationError.Text("Error message")),
+                phase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
             )
         ),
         actionForPhase = ScratchCardUiPhaseId.ACTIVATED,
@@ -213,8 +213,8 @@ private fun ScratchCardLoadingStatePreview() {
         modifier = Modifier.fillMaxSize(),
         uiState = mutableStateOf(
             ScratchCardUiState(
-                uiResult = ScratchCardUiResult.Loading,
-                currentPhase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
+                loadingAndError = ScratchCardUiLoadingAndError.Loading,
+                phase = ScratchCardUiPhase.Scratched(cardUuid = Uuid.random())
             )
         ),
         actionForPhase = ScratchCardUiPhaseId.ACTIVATED,

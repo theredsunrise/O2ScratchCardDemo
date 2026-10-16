@@ -6,17 +6,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.ui.NavDisplay
+import com.example.scratchcardo2demo.presentation.mapper.PresentationError
 import com.example.scratchcardo2demo.presentation.navigation.AppDestination
 import com.example.scratchcardo2demo.presentation.navigation.appEntryProvider
 import com.example.scratchcardo2demo.presentation.navigation.rememberNavigator
 import com.example.scratchcardo2demo.presentation.navigation.toEntries
-import com.example.scratchcardo2demo.presentation.mapper.PresentationError
 import com.example.scratchcardo2demo.presentation.screen.component.ModalDialog
 import com.example.scratchcardo2demo.shared.ObserveAsEvents
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.koinInject
 import scratchcardo2demo.shared.generated.resources.Res
 import scratchcardo2demo.shared.generated.resources.error_title
@@ -30,10 +31,14 @@ fun App() {
                 topLevelDestinations = setOf(AppDestination.AppScreen)
             )
 
-            val errorState = remember { mutableStateOf<PresentationError?>(null) }
+            val errorState = rememberSaveable() { mutableStateOf<String?>(null) }
             val appState = koinInject<AppState>()
+
             ObserveAsEvents(flow = appState.errorFlow) {
-                errorState.value = it
+                errorState.value = when (it) {
+                    is PresentationError.Text -> it.value
+                    is PresentationError.Resource -> getString(resource = it.value)
+                }
             }
 
             NavDisplay(

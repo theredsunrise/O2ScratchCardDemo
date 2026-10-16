@@ -2,10 +2,10 @@ package com.example.scratchcardo2demo.presentation.model
 
 import com.example.scratchcardo2demo.presentation.mapper.PresentationError
 
-sealed interface ScratchCardUiResult {
-    data object Nothing : ScratchCardUiResult
-    data object Loading : ScratchCardUiResult
-    data class Error(val error: PresentationError) : ScratchCardUiResult
+sealed interface ScratchCardUiLoadingAndError {
+    data object Nothing : ScratchCardUiLoadingAndError
+    data object Loading : ScratchCardUiLoadingAndError
+    data class Error(val error: PresentationError) : ScratchCardUiLoadingAndError
 
     val isLoading: Boolean get() = this == Loading
     val isSuccess: Boolean get() = this !is Error

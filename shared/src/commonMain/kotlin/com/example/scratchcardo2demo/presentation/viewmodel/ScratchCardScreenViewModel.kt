@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scratchcardo2demo.domain.`interface`.ScratchCardPersistenceRepository
 import com.example.scratchcardo2demo.domain.usecase.ScratchCardUseCase
-import com.example.scratchcardo2demo.presentation.mapper.toUi
 import com.example.scratchcardo2demo.presentation.mapper.toPresentationError
+import com.example.scratchcardo2demo.presentation.mapper.toUi
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiIntent
-import com.example.scratchcardo2demo.presentation.model.ScratchCardUiResult
+import com.example.scratchcardo2demo.presentation.model.ScratchCardUiLoadingAndError
 import com.example.scratchcardo2demo.presentation.model.ScratchCardUiState
 import com.example.scratchcardo2demo.shared.assertIsNotMainThread
 import kotlinx.coroutines.CancellationException
@@ -37,30 +37,30 @@ class ScratchCardScreenViewModel(
     private val trigger = MutableSharedFlow<ScratchCardUiIntent>()
 
     private val repositoryFlow = persistenceRepository.state.map {
-        assertIsNotMainThread()
-        it?.toUi(result = ScratchCardUiResult.Nothing) ?: ScratchCardUiState.UNSCRATCHED
+        //assertIsNotMainThread()
+        it?.toUi(loadingAndError = ScratchCardUiLoadingAndError.Nothing) ?: ScratchCardUiState.UNSCRATCHED
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val scratchCardFlow: Flow<ScratchCardUiResult> =
+    private val scratchCardFlow: Flow<ScratchCardUiLoadingAndError> =
         trigger.filterIsInstance<ScratchCardUiIntent.Scratch>().flatMapLatest {
             flow {
-                assertIsNotMainThread()
-                emit(ScratchCardUiResult.Loading as ScratchCardUiResult)
+                //assertIsNotMainThread()
+                emit(ScratchCardUiLoadingAndError.Loading as ScratchCardUiLoadingAndError)
                 //result is not emitted because it will be delivered later via persistenceRepository
                 scratchCardUseCase()
-                emit(ScratchCardUiResult.Nothing)
+                emit(ScratchCardUiLoadingAndError.Nothing)
             }.catch {
                 if (it !is CancellationException) {
-                    emit(value = ScratchCardUiResult.Error(it.toPresentationError()))
+                    emit(value = ScratchCardUiLoadingAndError.Error(it.toPresentationError()))
                 }
             }
-        }.onStart { emit(ScratchCardUiResult.Nothing) }
+        }.onStart { emit(ScratchCardUiLoadingAndError.Nothing) }
 
     val uiState: StateFlow<ScratchCardUiState> =
-        combine(repositoryFlow, scratchCardFlow) { uiState, uiResult ->
-            assertIsNotMainThread()
-            uiState.copy(uiResult = uiResult)
+        combine(repositoryFlow, scratchCardFlow) { uiState, loadingAndError ->
+            //assertIsNotMainThread()
+            uiState.copy(loadingAndError = loadingAndError)
         }.flowOn(dispatcher).stateIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
