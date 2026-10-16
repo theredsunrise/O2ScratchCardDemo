@@ -5,8 +5,8 @@ Sofistikovanejším riešením pre dlhotrvajúcu úlohu pri aktivácii karty by 
 
 - Android: minimum SDK 28 (Android 9), compile/target SDK 37
 - iOS: deployment target 18.2
-- Architektúra: Clean Architecture, MVI, ViewModel, Kotlin Multiplatform, Compose Multiplatform a Kotlin Flow
-- Testy: Kotlin Test/JUnit, Kotest, Mokkery, Turbine a `kotlinx-coroutines-test`
+- Architektúra: Clean Architecture, Koin, MVI s view model, Kotlin Multiplatform, Compose Multiplatform a Kotlin Flow
+- Testy: Kotlin Test/JUnit, Kotest, Mokkery (KMP verzia mockk), Turbine
 
 Build apky: ./gradlew :androidApp:assembleDebug
 Spustenie testov: ./gradlew :shared:testAndroidHostTest 
