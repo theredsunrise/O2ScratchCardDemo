@@ -141,7 +141,7 @@ class FileScratchCardPersistenceRepository(
                 error = null,
             )
         ) {
-            "Failed to write to App references."
+            "Failed to write to App preferences."
         }
     }
 }

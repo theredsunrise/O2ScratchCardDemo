@@ -23,10 +23,10 @@ class NavigationState(
     val topLevelDestinations: Set<NavKey>,
     val backStackMap: Map<NavKey, NavBackStack<NavKey>>
 ) {
-    var currentToLevelDestination by startTopLevelDestinationState
+    var currentTopLevelDestination by startTopLevelDestinationState
     val currentBackStack: NavBackStack<NavKey>
-        get() = requireNotNull(backStackMap[currentToLevelDestination]) {
-            "No backstack for destination $currentToLevelDestination"
+        get() = requireNotNull(backStackMap[currentTopLevelDestination]) {
+            "No backstack for destination $currentTopLevelDestination"
         }
 
     init {
@@ -36,6 +36,7 @@ class NavigationState(
 }
 
 @Composable
+//prepared to support additional top-level app destinations when tabs are introduced.
 fun NavigationState.toEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): SnapshotStateList<NavEntry<NavKey>> {
     val decoratedBackStackMap = backStackMap.mapValues { (_, stack) ->
         val decorators: List<NavEntryDecorator<NavKey>> = listOf(
@@ -44,8 +45,8 @@ fun NavigationState.toEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): Snap
         )
         rememberDecoratedNavEntries(stack, decorators, entryProvider)
     }
-    return requireNotNull(decoratedBackStackMap[currentToLevelDestination]) {
-        "No backstack for destination $currentToLevelDestination"
+    return requireNotNull(decoratedBackStackMap[currentTopLevelDestination]) {
+        "No backstack for destination $currentTopLevelDestination"
     }.toMutableStateList()
 }
 

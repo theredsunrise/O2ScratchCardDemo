@@ -8,6 +8,5 @@ sealed interface ScratchCardUiLoadingAndError {
     data class Error(val error: PresentationError) : ScratchCardUiLoadingAndError
 
     val isLoading: Boolean get() = this == Loading
-    val isSuccess: Boolean get() = this !is Error
     val isError: Boolean get() = this is Error
 }

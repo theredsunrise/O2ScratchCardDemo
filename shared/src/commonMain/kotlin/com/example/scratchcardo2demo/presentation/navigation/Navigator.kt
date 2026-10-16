@@ -7,7 +7,7 @@ class Navigator(val navigationState: NavigationState) {
     fun navigateTo(destination: AppDestination) =
         navigationState.apply {
             if (destination in topLevelDestinations) {
-                currentToLevelDestination = destination
+                currentTopLevelDestination = destination
             } else {
                 if(currentBackStack.lastOrNull() != destination) {
                     currentBackStack.add(destination)
